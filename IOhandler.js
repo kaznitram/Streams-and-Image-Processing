@@ -51,8 +51,12 @@ const readDir = (dir) => {
     fsP.readdir(dir, "utf8")
       .then((data) => {
         pngFiles = data.filter((file) => path.extname(file).toLowerCase() == ".png");
-        pngFiles.forEach( element => pathFiles.push(path.resolve(`./unzipped/${element}`)));
+        //pngFiles.forEach( element => pathFiles.push(path.resolve(`./unzipped/${element}`))); 
+        pngFiles.forEach( element => pathFiles.push(path.resolve(`./unzipped/myfile/${element}`)));
 
+
+        // debugging
+        console.log("Printing path files " + pathFiles);   // debugging *********
         resolve(pathFiles);
       })
       .catch((err) => reject(err));
@@ -76,37 +80,54 @@ const grayScale = (pathIn, pathOut) => {
     console.log("Inside gray scale function. pt 1");  // debugging
     let count = 1;
 
+    // debuggin       // *********** path in is empty!
+    console.log("\n-------------------");
+    console.log(pathIn);
+    console.log("-------------------\n");
+
     pathIn.forEach( element => {
       // this doesn't run... ?
-      console.log("for loop ran");  // debugging
+      console.log("for loop ran");  // debugging     // not running
       fs.createReadStream(element)
       .pipe(
+        // debug. dang can't print here
         new PNG()
       )
       .on("parsed", function () {
-        
+        // debugg
+        console.log("parsed ran");
 
+        console.log(this.height);
+        console.log(this.length);
+
+
+        
         for (var y = 0; y < this.height; y++) {
+          //console.log("\nFirst for loop ran\n");  // not running
           for (var x = 0; x < this.width; x++) {
             var idx = (this.width * y + x) << 2;
 
             // debugging
             // hmmmmm this part isn't running =/
-            console.log("\n-------------------");
-            console.log("The pixel part ran");
-            console.log("-------------------\n");
+            // ***** if you have debugs in here it takes a million years *******
+            //console.log("\n-------------------");
+            //console.log("The pixel part ran");
+            // console.log("-------------------\n");
 
-            // grayscale:
-            this.data[idx] = 0.2126 * this.data[idx];
-            this.data[idx + 1] = 0.7152 * this.data[idx + 1];
-            this.data[idx + 2] = 0.0722 * this.data[idx + 2];
+            // grayscale:    // cool. this worked
+            let luminosity =  0.2126 * this.data[idx] + 0.7152 * this.data[idx + 1] + 0.0722 * this.data[idx + 2];
+
+            this.data[idx] = luminosity; //0.2126 * this.data[idx];
+            this.data[idx + 1] = luminosity; //0.7152 * this.data[idx + 1];
+            this.data[idx + 2] = luminosity; //0.0722 * this.data[idx + 2];
 
             // and reduce opacity
             //this.data[idx + 3] = this.data[idx + 3] >> 1;
           }
         }
+        
 
-        this.pack().pipe(fs.createWriteStream(`${pathOut}/GS_${count}`));
+        this.pack().pipe(fs.createWriteStream(`${pathOut}/GS_${count}.png`));
         count++;
         resolve("Your photos have been GrayScaled");
       })

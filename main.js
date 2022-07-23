@@ -9,8 +9,11 @@
 
 const IOhandler = require("./IOhandler"),
   zipFilePath = `${__dirname}/myfile.zip`,
-  pathUnzipped = `${__dirname}/unzipped`,
-  pathProcessed = `${__dirname}/grayscaled`;
+  pathUnzipped = `${__dirname}/unzipped/myfile`,
+  pathProcessed = `${__dirname}/grayscaled`;    // directory doesn't exist
+  //pathProcessed = `${__dirname}/unzipped/myfile`
+
+// getting weird errors on directory routes. creating a redundant folder, but it's working
 
 
   /*
@@ -26,7 +29,6 @@ const IOhandler = require("./IOhandler"),
   
 
 // this format works though
-
   IOhandler.unzip(zipFilePath,pathUnzipped)
   .then((msg)=>{
      console.log(msg);
